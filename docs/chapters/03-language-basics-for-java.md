@@ -59,6 +59,9 @@ const timeoutSec = 3
 
 필요하면 `iota`로 열거 상수를 만들 수 있습니다.
 
+`iota`는 `const` 블록 안에서 줄마다 `0, 1, 2, ...`로 자동 증가하는 특별 식별자입니다.  
+새로운 `const` 블록이 시작되면 다시 `0`부터 시작합니다.
+
 ```go
 const (
 	StatusPending = iota
@@ -66,6 +69,8 @@ const (
 	StatusCanceled
 )
 ```
+
+위 예시 값은 `StatusPending=0`, `StatusPaid=1`, `StatusCanceled=2`입니다.
 
 ### zero value
 
@@ -173,7 +178,7 @@ func split(full string) (first string, last string) {
 named return은 편리하지만, 복잡한 함수에서는 오히려 가독성을 해칠 수 있습니다.  
 짧고 의도가 분명한 경우에만 제한적으로 사용하세요.
 
-### variadic 함수
+### variadic 함수(가변 함수)
 
 ```go
 func sum(nums ...int) int {
@@ -206,43 +211,11 @@ if err != nil {
 }
 ```
 
-### 에러 래핑(wrap)
+에러에 대한 자세한 내용은 06장에서 다룹니다.
 
-맥락을 추가할 때 `%w`를 사용합니다.
-
-```go
-if err != nil {
-	return fmt.Errorf("find user id=%d: %w", id, err)
-}
-```
-
-상위 계층에서는 `errors.Is`, `errors.As`로 원인 분기 가능합니다.
-
-```go
-if errors.Is(err, sql.ErrNoRows) {
-	return ErrUserNotFound
-}
-```
-
-### sentinel error vs typed error
-
-1. Sentinel error  
-   예: `var ErrNotFound = errors.New("not found")`  
-   단순 비교에 유리하지만, 문맥 정보 확장이 제한적입니다.
-2. Typed error  
-   구조체 기반 에러 타입으로 필드(코드, 리소스 ID 등)를 담을 수 있습니다.  
-   분기와 로깅에 유리하지만 타입 수가 과도하게 늘 수 있습니다.
-
-실무에서는 다음 기준을 자주 사용합니다.
-
-1. 단순 상태 신호: sentinel
-2. 추가 메타데이터 필요: typed error
-3. 경계 밖으로 전달할 때: wrap으로 맥락 보강
-
-### `panic`의 위치
-
-일반 비즈니스 에러 처리에 `panic`을 사용하지 않습니다.  
-`panic`은 보통 "복구 불가능한 프로그래밍 오류"나 "프로세스 부팅 실패" 같은 경계 상황에 한정합니다.
+1. `%w` 래핑과 `errors.Is`/`errors.As` 분기
+2. sentinel error vs typed error 선택 기준
+3. `panic`/`recover` 사용 경계
 
 ## 요약
 
@@ -250,7 +223,6 @@ if errors.Is(err, sql.ErrNoRows) {
 2. zero value와 짧은 선언(`:=`)을 이해하면 코드가 훨씬 간결해진다.
 3. `for`/`switch`/`defer`는 Go 코드 흐름의 핵심 도구다.
 4. 함수 다중 반환과 `error` 값 전달이 Go 에러 처리의 기본 패턴이다.
-5. wrap, sentinel, typed error를 상황에 맞게 선택해야 한다.
 
 ## 체크리스트
 
@@ -258,4 +230,8 @@ if errors.Is(err, sql.ErrNoRows) {
 - `:=`가 선언인지 재할당인지 구분하고 있는가
 - 리소스 정리를 `defer`로 일관되게 처리하고 있는가
 - 함수 반환값에서 `error`를 즉시 처리하고 있는가
-- `panic`을 일반 흐름 제어에 사용하지 않고 있는가
+- 에러를 숨기지 않고 호출자에게 명시적으로 전달하고 있는가
+
+## 다음 챕터
+
+- [04. 타입 시스템: Java 개발자가 헷갈리는 지점 정리](./04-type-system-pitfalls-for-java.md)

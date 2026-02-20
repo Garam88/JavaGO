@@ -111,7 +111,9 @@ func writeJSON(w http.ResponseWriter, code int, v any) {
 ### 파일 업로드
 
 ```go
-if err := r.ParseMultipartForm(10 << 20); err != nil { // 10MB
+const maxUploadSize = 10 << 20 // 10MB
+r.Body = http.MaxBytesReader(w, r.Body, maxUploadSize) // 요청 본문 전체 제한
+if err := r.ParseMultipartForm(10 << 20); err != nil { // 메모리 버퍼 상한(초과분은 임시 파일 사용)
 	writeError(w, http.StatusBadRequest, "invalid multipart")
 	return
 }
@@ -120,10 +122,11 @@ file, header, err := r.FormFile("file")
 
 안전 포인트:
 
-1. 업로드 크기 제한
-2. 파일명/확장자 신뢰 금지
-3. MIME/type 검증 및 저장 경로 고정
-4. 악성 파일 검사 정책 연계
+1. 요청 본문 전체 크기 제한(`http.MaxBytesReader`)
+2. `ParseMultipartForm` 메모리 버퍼 상한 설정
+3. 파일명/확장자 신뢰 금지
+4. MIME/type 검증 및 저장 경로 고정
+5. 악성 파일 검사 정책 연계
 
 ## 인증/인가 개요
 
@@ -217,3 +220,7 @@ log.Printf("level=info msg=\"order created\" order_id=%d user_id=%d", orderID, u
 - JSON 디코딩 시 unknown field(알 수 없는 필드) 정책을 적용했는가
 - 인증(401)과 인가(403)를 구분해 처리하는가
 - 요청 단위 `request_id`/`trace_id`를 로그에 남기고 있는가
+
+## 다음 챕터
+
+- [09. 데이터 계층: DB/캐시/메시징](./09-data-layer-db-cache-messaging.md)

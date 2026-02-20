@@ -201,3 +201,7 @@ if err := dec.Decode(&req); err != nil {
 - 동시 접근 맵을 락 없이 쓰지 않는가
 - 문자열 반복 연결 경로에서 `Builder`를 검토했는가
 - JSON 요청 디코딩 시 알 수 없는 필드 처리 정책이 있는가
+
+## 다음 챕터
+
+- [06. 예외가 없는 세계: 에러 처리/리커버리 패턴](./06-error-handling-and-recovery.md)

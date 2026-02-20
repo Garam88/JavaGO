@@ -1,8 +1,16 @@
-.PHONY: test-examples
+.PHONY: run-example test-examples compose-up compose-down compose-logs
+
+run-example:
+	@cd examples/go-commerce-api && go run ./cmd/api
 
 test-examples:
-	@find examples -name main.go -print | while read -r file; do \
-		dir="$$(dirname "$$file")"; \
-		echo "[run] $$dir"; \
-		(cd "$$dir" && go run .); \
-	done
+	@cd examples/go-commerce-api && go test ./...
+
+compose-up:
+	@docker compose -f examples/docker-compose.yml up --build
+
+compose-down:
+	@docker compose -f examples/docker-compose.yml down
+
+compose-logs:
+	@docker compose -f examples/docker-compose.yml logs -f

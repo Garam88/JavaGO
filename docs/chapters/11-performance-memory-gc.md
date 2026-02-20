@@ -182,3 +182,7 @@ go test -run=^$ -bench=. -mutexprofile=mutex.out ./...
 - `-benchmem`과 pprof 결과를 근거로 개선하고 있는가
 - lock/channel 대기로 인한 병목을 점검했는가
 - 운영 반영 시 카나리/롤백 기준을 갖고 있는가
+
+## 다음 챕터
+
+- [12. 코드 구조화 & 아키텍처(자바 스프링 감각으로)](./12-code-structure-and-architecture.md)

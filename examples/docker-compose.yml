@@ -1,0 +1,57 @@
+services:
+  api:
+    build:
+      context: ./go-commerce-api
+      dockerfile: Dockerfile
+    container_name: go-commerce-api
+    environment:
+      HTTP_PORT: "8080"
+      EVENT_BUFFER_SIZE: "128"
+      WORKER_MAX_RETRIES: "3"
+      WORKER_BASE_BACKOFF: "200ms"
+      DB_DSN: "postgres://commerce:commerce@postgres:5432/commerce?sslmode=disable"
+      REDIS_ADDR: "redis:6379"
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: go-commerce-postgres
+    environment:
+      POSTGRES_USER: commerce
+      POSTGRES_PASSWORD: commerce
+      POSTGRES_DB: commerce
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./go-commerce-api/migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U commerce -d commerce"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: go-commerce-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 3s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:

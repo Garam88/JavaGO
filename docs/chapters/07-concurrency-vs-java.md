@@ -245,3 +245,7 @@ go test -run=^$ -bench=. -mutexprofile=mutex.out ./...
 - DB/HTTP/Redis 호출에 `ctx`가 전달되는가
 - 맵/카운터 같은 공유 상태를 락으로 보호하고 있는가
 - `go test -race ./...`를 정기 실행하고 있는가
+
+## 다음 챕터
+
+- [08. 표준 라이브러리로 만드는 서버 개발(웹 백엔드)](./08-server-development-with-stdlib.md)

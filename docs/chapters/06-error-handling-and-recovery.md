@@ -180,3 +180,7 @@ func RecoverMiddleware(next http.Handler) http.Handler {
 - 계층별(Repository/Service/Handler) 에러 책임이 분리되어 있는가
 - `panic`이 일반 실패 흐름에 섞여 있지 않은가
 - recover 경계에서 로그/메트릭/스택을 남기고 있는가
+
+## 다음 챕터
+
+- [07. 동시성(Go의 킬러 기능): Java 스레드/Executor와 비교](./07-concurrency-vs-java.md)

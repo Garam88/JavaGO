@@ -56,56 +56,13 @@ type OrderRepository interface {
 
 즉, 제어 흐름을 예외에 맡기기보다, 상태를 명시적으로 전달하는 방식이 기본입니다.
 
-## 프로젝트 구조와 빌드/실행 흐름
+## 요약
 
-`00`장에서 소개한 예제 서비스(`go-commerce-api`) 관점으로 기본 흐름을 먼저 잡겠습니다.
+1. Go는 단순성/명시성/빠른 컴파일/표준 라이브러리 중심의 언어다.
+2. 클래스 상속보다 `struct + method + interface` 조합이 핵심이다.
+3. 인터페이스는 구현 이전이 아니라 "필요한 경계"에서 작게 도입한다.
 
-### 권장 구조(초기)
-
-```text
-go-commerce-api/
-├─ cmd/
-│  └─ api/                 # 실행 진입점(main)
-├─ internal/
-│  ├─ domain/              # 도메인 모델
-│  ├─ service/             # 비즈니스 로직
-│  ├─ repository/          # DB/캐시 접근
-│  ├─ transport/http/      # HTTP 핸들러/DTO
-│  └─ worker/              # 비동기 작업
-├─ pkg/                    # 외부 공개 가능한 유틸(선택)
-├─ migrations/             # DB 스키마 변경
-└─ deployments/            # 배포 관련 설정
-```
-
-설계 의도:
-
-1. `cmd/`: 실행 가능한 애플리케이션 단위
-2. `internal/`: 프로젝트 내부 전용 코드(외부 import 방지)
-3. `transport`와 `service` 분리: HTTP 표현과 도메인 로직 분리
-4. `repository`: 영속성 기술(DB/Redis/메시징) 변경 영향을 경계에 격리
-
-### 빌드/실행 기본 루프
-
-개발 중 가장 자주 쓰는 명령은 아래 4개입니다.
-
-```bash
-go test ./...
-go run ./cmd/api
-go build ./cmd/api
-go test -race ./...
-```
-
-- `go test ./...`: 전체 패키지 테스트 실행
-- `go run ./cmd/api`: 로컬 서버 빠른 실행
-- `go build ./cmd/api`: 컴파일 가능 상태 확인
-- `go test -race ./...`: 데이터 레이스 탐지
-
-### 의존성 관리 흐름(핵심만)
-
-1. 모듈 초기화: `go mod init <module-path>`
-2. 코드에서 import 추가 후 `go test` 또는 `go build` 실행
-3. 필요 의존성은 `go.mod`, `go.sum`에 기록
-4. 팀 단위에서는 `go.mod`/`go.sum`을 반드시 함께 커밋
+## 번외
 
 ### Java 개발자가 초기에 자주 하는 실수
 
@@ -116,16 +73,6 @@ go test -race ./...
 
 초기에는 "작은 패키지 + 명확한 의존 방향 + 테스트 가능한 함수"에 집중하면 됩니다.
 
-## 요약
+## 다음 챕터
 
-1. Go는 단순성/명시성/빠른 컴파일/표준 라이브러리 중심의 언어다.
-2. 클래스 상속보다 `struct + method + interface` 조합이 핵심이다.
-3. 인터페이스는 구현 이전이 아니라 "필요한 경계"에서 작게 도입한다.
-4. 프로젝트는 `cmd`와 `internal` 중심으로 시작하면 확장과 운영이 수월하다.
-
-## 체크리스트
-
-- `go test ./...`와 `go build ./cmd/api`를 실행하는 습관이 있는가
-- 인터페이스를 "필요 최소 행위"만 담도록 설계했는가
-- `panic`과 `error`의 용도를 구분하고 있는가
-- 패키지 의존 방향이 한쪽으로 흐르도록 유지하고 있는가
+- [02. 개발 환경 세팅 & 툴체인](./02-setup-and-toolchain.md)

@@ -48,7 +48,9 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o bin
 예시 개념:
 
 ```dockerfile
-FROM golang:1.22 AS builder
+# 팀 정책에 맞는 최소 지원 버전(MSGV) 또는 표준 버전으로 고정
+ARG GO_VERSION=1.22
+FROM golang:${GO_VERSION} AS builder
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
@@ -60,6 +62,8 @@ COPY --from=builder /out/api /api
 USER nonroot:nonroot
 ENTRYPOINT ["/api"]
 ```
+
+위 예시의 `1.22`는 샘플 값입니다. `00`/`02`장에서 정의한 팀 버전 정책(최소 지원 버전 + 최신 안정 버전 검증)에 맞게 실제 값을 고정하세요.
 
 ### 실무 체크포인트
 
@@ -200,3 +204,7 @@ go func() {
 - readiness/liveness와 graceful shutdown이 분리 설계되어 있는가
 - RED 지표와 의존성 지표에 알람이 설정되어 있는가
 - 릴리즈 전/후 점검 게이트와 롤백 기준이 문서화되어 있는가
+
+## 다음 챕터
+
+- [14. Java -> Go 마이그레이션 가이드(선택)](./14-java-to-go-migration-guide.md)

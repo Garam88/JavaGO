@@ -121,7 +121,10 @@ func (f *fakeOrderRepo) Save(ctx context.Context, o Order) error {
 3. 테스트 데이터는 명시적으로 생성/정리
 
 ```go
-tx, _ := db.BeginTx(ctx, nil)
+tx, err := db.BeginTx(ctx, nil)
+if err != nil {
+	t.Fatalf("begin tx: %v", err)
+}
 defer tx.Rollback()
 repo := NewOrderRepo(tx)
 ```
@@ -201,3 +204,7 @@ go tool pprof cpu.out
 - 통합 테스트 환경이 로컬/CI에서 재현 가능한가
 - `-race`, `-cover`, `-benchmem`를 정기 루틴에 포함했는가
 - 성능 변경은 측정 결과로 의사결정하고 있는가
+
+## 다음 챕터
+
+- [11. 성능/메모리/GC 감각 잡기](./11-performance-memory-gc.md)
