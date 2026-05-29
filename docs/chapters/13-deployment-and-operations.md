@@ -49,7 +49,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o bin
 
 ```dockerfile
 # 팀 정책에 맞는 최소 지원 버전(MSGV) 또는 표준 버전으로 고정
-ARG GO_VERSION=1.22
+ARG GO_VERSION=1.26.3
 FROM golang:${GO_VERSION} AS builder
 WORKDIR /src
 COPY go.mod go.sum ./
@@ -63,7 +63,7 @@ USER nonroot:nonroot
 ENTRYPOINT ["/api"]
 ```
 
-위 예시의 `1.22`는 샘플 값입니다. `00`/`02`장에서 정의한 팀 버전 정책(최소 지원 버전 + 최신 안정 버전 검증)에 맞게 실제 값을 고정하세요.
+위 예시의 `1.26.3`은 2026-05 기준 샘플 값입니다. `00`/`02`장에서 정의한 팀 버전 정책(최소 지원 버전 + 최신 안정 버전 검증)에 맞게 실제 값을 고정하세요.
 
 ### 실무 체크포인트
 
@@ -88,9 +88,9 @@ ENTRYPOINT ["/api"]
 ### 헬스체크 분리
 
 1. Liveness: 프로세스 생존 여부
-2. Readiness: 요청 처리 준비 여부(DB/Redis/MQ 연결 상태 포함)
+2. Readiness: 요청 처리 준비 여부(DB/Redis/NATS 연결 상태 포함)
 
-`/healthz` 하나로 모든 상태를 처리하기보다 목적별 엔드포인트를 분리하는 편이 안전합니다.
+`go-commerce-api`는 `/livez`와 `/readyz`를 분리하고, 기존 `/healthz`는 호환용 liveness로 유지합니다. `/readyz`는 Postgres, Redis, NATS 상태를 함께 확인합니다.
 
 ### 그레이스풀 셧다운
 
@@ -111,7 +111,7 @@ go func() {
 핵심:
 
 1. 종료 타임아웃 명시
-2. DB/Redis/MQ 연결 정리
+2. DB/Redis/NATS 연결 정리
 3. worker 소비 중단 + in-flight 작업 처리 정책 정의
 
 롤링 배포 시 readiness를 먼저 내려 새 트래픽을 차단한 뒤 종료하면 손실을 줄일 수 있습니다.
@@ -127,7 +127,7 @@ go func() {
 
 1. RED 지표: Rate, Errors, Duration
 2. 리소스: CPU, memory, goroutine, GC pause
-3. 의존성: DB/Redis/MQ 지연/에러율
+3. 의존성: DB/Redis/NATS 지연/에러율
 
 ### 로그
 
@@ -139,7 +139,7 @@ go func() {
 ### 트레이스
 
 1. inbound HTTP span
-2. outbound(DB/Redis/MQ/HTTP) span
+2. outbound(DB/Redis/NATS/HTTP) span
 3. 에러/타임아웃 상태 기록
 
 ### 알람 원칙

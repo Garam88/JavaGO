@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -8,19 +9,40 @@ import (
 )
 
 type Config struct {
-	HTTPPort          string
-	EventBufferSize   int
-	WorkerMaxRetries  int
-	WorkerBaseBackoff time.Duration
+	HTTPPort           string
+	DBDSN              string
+	RedisAddr          string
+	NATSURL            string
+	RequestTimeout     time.Duration
+	CacheTTL           time.Duration
+	OutboxPollInterval time.Duration
+	WorkerMaxRetries   int
+	WorkerBaseBackoff  time.Duration
 }
 
 func Load() (Config, error) {
-	eventBufferSize, err := getenvInt("EVENT_BUFFER_SIZE", 64)
+	requestTimeout, err := getenvDuration("REQUEST_TIMEOUT", 5*time.Second)
 	if err != nil {
-		return Config{}, fmt.Errorf("EVENT_BUFFER_SIZE: %w", err)
+		return Config{}, fmt.Errorf("REQUEST_TIMEOUT: %w", err)
 	}
-	if eventBufferSize < 1 {
-		return Config{}, fmt.Errorf("EVENT_BUFFER_SIZE must be >= 1")
+	if requestTimeout <= 0 {
+		return Config{}, fmt.Errorf("REQUEST_TIMEOUT must be > 0")
+	}
+
+	cacheTTL, err := getenvDuration("CACHE_TTL", 30*time.Second)
+	if err != nil {
+		return Config{}, fmt.Errorf("CACHE_TTL: %w", err)
+	}
+	if cacheTTL <= 0 {
+		return Config{}, fmt.Errorf("CACHE_TTL must be > 0")
+	}
+
+	outboxPollInterval, err := getenvDuration("OUTBOX_POLL_INTERVAL", 500*time.Millisecond)
+	if err != nil {
+		return Config{}, fmt.Errorf("OUTBOX_POLL_INTERVAL: %w", err)
+	}
+	if outboxPollInterval <= 0 {
+		return Config{}, fmt.Errorf("OUTBOX_POLL_INTERVAL must be > 0")
 	}
 
 	workerMaxRetries, err := getenvInt("WORKER_MAX_RETRIES", 3)
@@ -39,12 +61,21 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("WORKER_BASE_BACKOFF must be > 0")
 	}
 
-	return Config{
-		HTTPPort:          getenv("HTTP_PORT", "8080"),
-		EventBufferSize:   eventBufferSize,
-		WorkerMaxRetries:  workerMaxRetries,
-		WorkerBaseBackoff: workerBaseBackoff,
-	}, nil
+	cfg := Config{
+		HTTPPort:           getenv("HTTP_PORT", "8080"),
+		DBDSN:              os.Getenv("DB_DSN"),
+		RedisAddr:          getenv("REDIS_ADDR", "localhost:6379"),
+		NATSURL:            getenv("NATS_URL", "nats://localhost:4222"),
+		RequestTimeout:     requestTimeout,
+		CacheTTL:           cacheTTL,
+		OutboxPollInterval: outboxPollInterval,
+		WorkerMaxRetries:   workerMaxRetries,
+		WorkerBaseBackoff:  workerBaseBackoff,
+	}
+	if cfg.DBDSN == "" {
+		return Config{}, errors.New("DB_DSN is required")
+	}
+	return cfg, nil
 }
 
 func getenv(key, fallback string) string {

@@ -39,7 +39,7 @@
 
 아래 환경을 기준으로 진행합니다.
 
-1. Go: 최신 안정(stable) 버전 사용
+1. Go: 최신 안정(stable) 버전 사용(2026-05 기준 예제는 Go 1.26 계열)
 2. 모듈: `go mod` 기반 의존성 관리
 3. IDE: VS Code(Go 확장) 또는 GoLand
 4. 포맷터: `gofmt`, `goimports`
@@ -64,23 +64,25 @@ go env GOPATH GOMOD GOCACHE
 책 전체에서 하나의 예제 서비스를 점진적으로 완성합니다.
 
 - 프로젝트 이름(가칭): `go-commerce-api`
-- 목표: 주문/결제 흐름을 단순화한 REST API
+- 목표: 상품/주문 흐름을 단순화한 REST API
 - 구성: HTTP API + DB + 캐시 + 메시지 이벤트 + 백그라운드 워커
 
 예제에서 다룰 핵심 기능:
 
-1. 상품/주문 조회 및 생성 API
+1. 상품/주문 조회 및 주문 생성 API
 2. 트랜잭션 기반 주문 저장
 3. Redis 캐시 조회/무효화
 4. 이벤트 발행(예: `order.created`)
 5. 컨슈머 워커의 재시도/실패 처리
+
+결제 흐름은 주문 이후의 확장 주제로 분리합니다. 이 책의 실행 가능한 예제는 상품 재고 차감, 주문 저장, outbox 이벤트 발행까지를 일관되게 보여주는 데 집중합니다.
 
 권장 기술 스택:
 
 1. HTTP: `net/http`
 2. DB: PostgreSQL (`database/sql`)
 3. Cache: Redis
-4. Message: NATS 또는 Kafka 중 하나 선택
+4. Message: NATS JetStream
 5. 관측성(Observability): 구조적 로그 + 메트릭 + 트레이스 기본
 
 초기 디렉터리 예시는 아래와 같습니다.

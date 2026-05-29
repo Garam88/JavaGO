@@ -207,13 +207,20 @@ user:{user_id}:orders:page:{n}
 
 ### 트랜잭션과 이벤트 발행
 
-DB 업데이트와 이벤트 발행의 원자성을 맞추려면 Outbox 패턴을 고려합니다.
+DB 업데이트와 이벤트 발행의 원자성을 맞추려면 Outbox 패턴을 고려합니다. 현재 `go-commerce-api` 예제는 주문 생성 트랜잭션 안에서 재고 차감, 주문 저장, `outbox_events` insert를 함께 수행하고, 별도 publisher가 pending 이벤트를 NATS JetStream으로 발행합니다.
 
 1. 비즈니스 변경 + outbox insert를 같은 트랜잭션으로 처리
 2. 별도 퍼블리셔가 outbox를 읽어 브로커에 발행
 3. 발행 성공 후 outbox 상태 갱신
 
 이 패턴은 "DB 성공, 메시지 실패" 불일치 문제를 크게 줄여줍니다.
+
+예제의 기준 구현:
+
+1. DB: PostgreSQL + `database/sql` + pgx stdlib
+2. Cache: Redis cache-aside, 키 prefix는 `v1:item:{id}`, `v1:order:{id}`
+3. Message: NATS JetStream, stream은 `ORDER_EVENTS`, subject는 `order.created`
+4. Consumer: `processed_events` 테이블에 이벤트 ID를 기록해 중복 처리를 방지
 
 ## 요약
 

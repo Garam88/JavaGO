@@ -151,18 +151,19 @@ go-commerce-api/
 │  │  └─ order_service.go
 │  ├─ repository/
 │  │  ├─ postgres/
-│  │  │  └─ order_repo.go
+│  │  │  └─ store.go
 │  │  └─ redis/
-│  │     └─ order_cache.go
+│  │     └─ cache.go
 │  ├─ transport/
 │  │  └─ http/
 │  │     ├─ handler_order.go
 │  │     ├─ middleware_auth.go
 │  │     └─ middleware_recover.go
 │  ├─ messaging/
-│  │  ├─ publisher.go
-│  │  └─ consumer.go
+│  │  └─ nats/
+│  │     └─ publisher.go
 │  └─ worker/
+│     ├─ outbox_publisher.go
 │     └─ order_event_worker.go
 ├─ migrations/
 │  ├─ 001_init.sql
@@ -175,7 +176,7 @@ go-commerce-api/
 │     └─ service.yaml
 ├─ test/
 │  ├─ integration/
-│  │  └─ order_api_test.go
+│  │  └─ order_flow_test.go
 │  └─ fixtures/
 ├─ docs/
 │  └─ api/

@@ -30,15 +30,33 @@
 
 ## 예시 코드 빠른 시작
 
-```bash
-cd examples/go-commerce-api
-go run ./cmd/api
-```
-
-Docker Compose로 실행:
+예제 API는 Postgres, Redis, NATS JetStream을 사용합니다. 가장 간단한 실행 방법은 Docker Compose입니다.
 
 ```bash
 docker compose -f examples/docker-compose.yml up --build
+```
+
+의존성만 먼저 띄우고 로컬에서 API를 실행할 수도 있습니다.
+
+```bash
+docker compose -f examples/docker-compose.yml up -d postgres redis nats
+make run
+```
+
+기본 API:
+
+- `GET /livez`
+- `GET /readyz`
+- `GET /items`
+- `GET /items/{id}`
+- `POST /orders`
+- `GET /orders`
+- `GET /orders/{id}`
+
+```bash
+curl -X POST http://localhost:8080/orders \
+  -H 'Content-Type: application/json' \
+  -d '{"user_id":"u-1","item_id":"sku-1","quantity":2}'
 ```
 
 포트 충돌 시:

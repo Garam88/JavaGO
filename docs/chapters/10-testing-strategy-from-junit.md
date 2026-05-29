@@ -106,12 +106,12 @@ func (f *fakeOrderRepo) Save(ctx context.Context, o Order) error {
 
 ## 통합 테스트
 
-`go-commerce-api`에서는 DB/Redis/MQ 연동이 핵심이므로 통합 테스트가 품질을 크게 좌우합니다.
+`go-commerce-api`에서는 DB/Redis/NATS 연동이 핵심이므로 통합 테스트가 품질을 크게 좌우합니다.
 
 ### 테스트 계층 구분
 
 1. Unit: 외부 의존 없이 함수/서비스 로직 검증
-2. Integration: 실제 DB/Redis/MQ와의 계약 검증
+2. Integration: 실제 DB/Redis/NATS와의 계약 검증
 3. E2E(선택): API 경로 전체 검증
 
 ### DB 통합 테스트 기본 패턴
@@ -132,6 +132,15 @@ repo := NewOrderRepo(tx)
 ### 컨테이너 기반 테스트
 
 로컬/CI 재현성을 높이기 위해 Docker 기반 테스트 환경을 자주 사용합니다.
+
+`go-commerce-api`는 기본 `go test ./...`를 외부 의존성 없이 빠르게 유지하고, Postgres/Redis/NATS 계약 검증은 build tag로 분리합니다.
+
+```bash
+go test ./...
+go test -tags=integration ./...
+```
+
+프로젝트 루트에서는 `make test-integration`이 Docker Compose로 필요한 의존성(Postgres/Redis/NATS)을 먼저 띄운 뒤 통합 테스트를 실행합니다.
 
 운영 포인트:
 
